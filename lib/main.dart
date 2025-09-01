@@ -1,805 +1,437 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-
-// pages
-import 'screens/booking_page.dart';
+// Import your pages
 import 'screens/favorites_page.dart';
+import 'screens/booking_page.dart';
+import 'screens/wallet_page.dart';
 import 'screens/notification_page.dart';
 import 'screens/profile_page.dart';
-import 'screens/wallet_page.dart';
-
 
 void main() {
-  runApp(const ParkProApp());
+  runApp(const MyApp());
 }
 
-class ParkProApp extends StatelessWidget {
-  const ParkProApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PARK-PRO',
-      debugShowCheckedModeBanner: false,
+      title: 'Park-Pro',
       theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
-        scaffoldBackgroundColor: Colors.grey.shade100,
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
+        primarySwatch: Colors.red,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const HomePage(),
+      home: const QuickBookPage(),
     );
   }
 }
 
-/// Mock parking data
-class ParkingSpot {
-  final String id;
-  final String name;
-  final LatLng position;
-  final double pricePerHour;
-  final bool hasEv;
-  final bool covered;
-  final bool secured;
-  final int availableSpots;
-  final double distanceKm;
-  final String? imageUrl;
-
-  ParkingSpot({
-    required this.id,
-    required this.name,
-    required this.position,
-    required this.pricePerHour,
-    required this.hasEv,
-    required this.covered,
-    required this.secured,
-    required this.availableSpots,
-    required this.distanceKm,
-    this.imageUrl,
-  });
-}
-
-/// Service data model
-class Service {
-  final String id;
-  final String name;
-  final String description;
-  final double price;
-  final String imageUrl;
-  final String category;
-
-  Service({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.imageUrl,
-    required this.category,
-  });
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class QuickBookPage extends StatefulWidget {
+  const QuickBookPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<QuickBookPage> createState() => _QuickBookPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  // Bottom nav
-  int _selectedTab = 0;
+class _QuickBookPageState extends State<QuickBookPage> {
+  int _currentIndex = 0;
 
-  // Search / filters
-  final TextEditingController _searchCtl = TextEditingController();
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-  bool _filterEv = false;
-  bool _filterCovered = false;
-  bool _filterSecured = false;
-  String _sort = 'Distance';
-
-  // Location dropdown
-  String _city = "Hyderabad";
-
-  // Map
-  GoogleMapController? _mapController;
-  final LatLng _mockUserLocation = const LatLng(17.444, 78.377); // Hitech City-ish
-  final MapType _mapType = MapType.normal;
-
-  // Mock parking data
-  late List<ParkingSpot> _allSpots;
-  late List<Service> _allServices;
-  String? _activeSpotId; // for sheet highlight
-
-  @override
-  void initState() {
-    super.initState();
-    _allSpots = _seedSpots();
-    _allServices = _seedServices();
-  }
-
-  List<ParkingSpot> _seedSpots() {
-    final rnd = Random(17);
-    final base = _mockUserLocation;
-    final spots = <ParkingSpot>[];
-    for (int i = 0; i < 12; i++) {
-      final dx = (rnd.nextDouble() - 0.5) * 0.04;
-      final dy = (rnd.nextDouble() - 0.5) * 0.04;
-      final pos = LatLng(base.latitude + dx, base.longitude + dy);
-      final dist = sqrt(dx * dx + dy * dy) * 111; // rough km
-      spots.add(
-        ParkingSpot(
-          id: 'spot_$i',
-          name: i == 0
-              ? "Downtown Mall Parking"
-              : i == 1
-              ? "Airport Terminal A"
-              : i == 2
-              ? "IT Park Block C"
-              : "Spot ${i + 1}",
-          position: pos,
-          pricePerHour: [30, 40, 50, 60, 80][rnd.nextInt(5)].toDouble(),
-          hasEv: rnd.nextBool(),
-          covered: rnd.nextBool(),
-          secured: rnd.nextBool(),
-          availableSpots: rnd.nextInt(12) + 1,
-          distanceKm: double.parse(dist.toStringAsFixed(2)),
-          imageUrl: i % 3 == 0 ? 'https://picsum.photos/300/200?random=$i' : null,
-        ),
-      );
-    }
-    return spots;
-  }
-
-  List<Service> _seedServices() {
-    return [
-      Service(
-        id: 'service_1',
-        name: 'Car Wash',
-        description: 'Complete exterior and interior cleaning',
-        price: 499,
-        imageUrl: 'https://picsum.photos/300/200?random=101',
-        category: 'Cleaning',
-      ),
-      Service(
-        id: 'service_2',
-        name: 'Detailing',
-        description: 'Premium interior and exterior detailing service',
-        price: 1499,
-        imageUrl: 'https://picsum.photos/300/200?random=102',
-        category: 'Cleaning',
-      ),
-      Service(
-        id: 'service_3',
-        name: 'Oil Change',
-        description: 'Engine oil and filter replacement',
-        price: 899,
-        imageUrl: 'https://picsum.photos/300/200?random=103',
-        category: 'Maintenance',
-      ),
-      Service(
-        id: 'service_4',
-        name: 'Tire Service',
-        description: 'Tire rotation, balancing and pressure check',
-        price: 399,
-        imageUrl: 'https://picsum.photos/300/200?random=104',
-        category: 'Maintenance',
-      ),
-      Service(
-        id: 'service_5',
-        name: 'EV Charging',
-        description: 'Fast charging for electric vehicles',
-        price: 299,
-        imageUrl: 'https://picsum.photos/300/200?random=105',
-        category: 'EV Services',
-      ),
-      Service(
-        id: 'service_6',
-        name: 'Car Inspection',
-        description: 'Comprehensive vehicle health check',
-        price: 599,
-        imageUrl: 'https://picsum.photos/300/200?random=106',
-        category: 'Maintenance',
-      ),
-    ];
-  }
-
-  List<ParkingSpot> get _filteredSortedSpots {
-    var list = _allSpots.where((s) {
-      if (_filterEv && !s.hasEv) return false;
-      if (_filterCovered && !s.covered) return false;
-      if (_filterSecured && !s.secured) return false;
-      if (_searchCtl.text.trim().isNotEmpty) {
-        final q = _searchCtl.text.toLowerCase();
-        if (!s.name.toLowerCase().contains(q)) return false;
-      }
-      return true;
-    }).toList();
-
-    switch (_sort) {
-      case 'Price':
-        list.sort((a, b) => a.pricePerHour.compareTo(b.pricePerHour));
-        break;
-      case 'Availability':
-        list.sort((b, a) => a.availableSpots.compareTo(b.availableSpots));
-        break;
-      default: // Distance
-        list.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
-    }
-    return list;
-  }
-
-  List<Service> get _filteredServices {
-    if (_searchCtl.text.trim().isEmpty) return _allServices;
-
-    final query = _searchCtl.text.toLowerCase();
-    return _allServices.where((service) {
-      return service.name.toLowerCase().contains(query) ||
-          service.description.toLowerCase().contains(query) ||
-          service.category.toLowerCase().contains(query);
-    }).toList();
-  }
-
-  // Marker color based on availability
-  double _hueFor(ParkingSpot s) {
-    if (s.availableSpots >= 8) return BitmapDescriptor.hueGreen;
-    if (s.availableSpots >= 4) return BitmapDescriptor.hueAzure;
-    return BitmapDescriptor.hueRed;
-  }
-
-  // --- UI BUILD ---
+  final List<Widget> _pages = const [
+    QuickBookHome(),
+    FavoritesPage(),
+    BookingPage(),
+    WalletPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildTopAppBar(),
-      body: _buildHomeContent(), // Always show home content
-      bottomNavigationBar: _buildBottomNav(),
-    );
-  }
-
-  PreferredSizeWidget _buildTopAppBar() {
-    return AppBar(
-      backgroundColor: Colors.lightBlueAccent,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      titleSpacing: 12,
-      title: Row(
-        children: [
-          const Icon(Icons.local_parking, size: 28, color: Colors.white),
-          const SizedBox(width: 8),
-          _buildCitySelector(),
-          const Spacer(),
-          IconButton(
-            tooltip: 'Notifications',
-            onPressed: () {
-              // Navigate to notifications
-            },
-            icon: const Icon(Icons.notifications_none, color: Colors.white),
-          ),
-          IconButton(
-            tooltip: 'Profile',
-            onPressed: () {
-              // Navigate to profile
-            },
-            icon: const Icon(Icons.account_circle, color: Colors.white),
-          ),
+      backgroundColor: Colors.white,
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorites'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Bookings'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Wallet'),
         ],
       ),
     );
   }
+}
 
-  Widget _buildCitySelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _city,
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-          dropdownColor: Colors.green.shade700,
-          items: const [
-            DropdownMenuItem(
-              value: "Hyderabad",
-              child: Text("Hyderabad", style: TextStyle(color: Colors.white)),
-            ),
-            DropdownMenuItem(
-              value: "Chennai",
-              child: Text("Chennai", style: TextStyle(color: Colors.white)),
-            ),
-            DropdownMenuItem(
-              value: "Bengaluru",
-              child: Text("Bengaluru", style: TextStyle(color: Colors.white)),
-            ),
-          ],
-          onChanged: (v) => setState(() => _city = v ?? _city),
-        ),
-      ),
-    );
+/// ----------------------
+/// HOME PAGE (with map + quick book section)
+/// ----------------------
+class QuickBookHome extends StatefulWidget {
+  const QuickBookHome({super.key});
+
+  @override
+  State<QuickBookHome> createState() => _QuickBookHomeState();
+}
+
+class _QuickBookHomeState extends State<QuickBookHome> {
+  late GoogleMapController mapController;
+  final LatLng _center = const LatLng(37.7749, -122.4194);
+  String _searchQuery = '';
+
+  final PageController _servicesController = PageController(viewportFraction: 0.7);
+  final PageController _featuresController = PageController(viewportFraction: 0.7);
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
-  Widget _buildHomeContent() {
-    final isWide = MediaQuery.sizeOf(context).width >= 900;
+  // Sample data
+  final List<Map<String, dynamic>> filteredParkingSpots = [
+    {'name': 'Downtown Parking', 'price': '₹120', 'distance': '0.8 km', 'available': 5},
+    {'name': 'City Center Garage', 'price': '₹150', 'distance': '1.2 km', 'available': 3},
+  ];
 
-    return Column(
-      children: [
-        _buildSearchRow(),
-        Expanded(
-          child: isWide ? _buildWideLayout() : _buildStackedLayout(),
-        ),
-      ],
-    );
-  }
+  final List<Map<String, dynamic>> filteredServices = [
+    {'icon': Icons.local_car_wash, 'title': 'Car Wash', 'price': '₹200', 'duration': '30 min', 'distance': '0.5 km', 'rating': 4.5},
+    {'icon': Icons.build, 'title': 'General Service', 'price': '₹500', 'duration': '2 hrs', 'distance': '1 km', 'rating': 4.8},
+    {'icon': Icons.ev_station, 'title': 'EV Charging', 'price': '₹50', 'duration': '1 hr', 'distance': '0.8 km', 'rating': 4.6},
+    {'icon': Icons.local_gas_station, 'title': 'Fuel Service', 'price': '₹100', 'duration': '15 min', 'distance': '0.6 km', 'rating': 4.2},
+  ];
 
-  Widget _buildSearchRow() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      child: Row(
+  final List<Map<String, dynamic>> filteredFeatures = [
+    {'icon': Icons.speed, 'title': 'Real Time Parking Detection', 'description': 'Dynamic parking availability detection'},
+    {'icon': Icons.navigation, 'title': 'GPS Navigation', 'description': 'Navigate directly to your spot'},
+    {'icon': Icons.security, 'title': 'IoT Surveillance', 'description': 'AI-integrated smart security'},
+    {'icon': Icons.event_available, 'title': 'Smart Reservations', 'description': 'AI-driven emergency response'},
+    {'icon': Icons.mic, 'title': 'Voice & Gesture Control', 'description': 'Park using voice & gestures'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      body: Column(
         children: [
-          // Search
-          Expanded(
-            child: TextField(
-              controller: _searchCtl,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: "Search parking or services...",
-                suffixIcon: IconButton(
-                  tooltip: 'Use current location',
-                  onPressed: () {
-                    _searchCtl.text = "Current Location";
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.near_me),
-                ),
+          // Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+            decoration: BoxDecoration(
+              color: Colors.lightBlue[50],
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          // Date
-          IconButton(
-            tooltip: 'Pick date & time',
-            onPressed: _pickDateTime,
-            icon: const Icon(Icons.calendar_today, color: Colors.lightBlueAccent),
-          ),
-          // Filter
-          IconButton(
-            tooltip: 'Filters',
-            onPressed: _openFilters,
-            icon: const Icon(Icons.filter_alt_outlined, color: Colors.lightBlueAccent),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _pickDateTime() async {
-    final now = DateTime.now();
-    final d = await showDatePicker(
-      context: context,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-      initialDate: _selectedDate ?? now,
-    );
-    if (d == null) return;
-    final t = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime ?? TimeOfDay.now(),
-    );
-    if (!mounted) return;
-    setState(() {
-      _selectedDate = d;
-      _selectedTime = t;
-    });
-  }
-
-  String _fmtDateTime(DateTime d, TimeOfDay t) {
-    final hh = t.hourOfPeriod.toString().padLeft(2, '0');
-    final mm = t.minute.toString().padLeft(2, '0');
-    final ap = t.period == DayPeriod.am ? "AM" : "PM";
-    return "${d.day}/${d.month}/${d.year} • $hh:$mm $ap";
-  }
-
-  void _openFilters() {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setM) {
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      const Text("Filters", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                      const Spacer(),
-                      DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _sort,
-                          items: const [
-                            DropdownMenuItem(value: 'Distance', child: Text('Sort: Distance')),
-                            DropdownMenuItem(value: 'Price', child: Text('Sort: Price')),
-                            DropdownMenuItem(value: 'Availability', child: Text('Sort: Availability')),
-                          ],
-                          onChanged: (v) => setM(() => _sort = v ?? _sort),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    title: const Text("EV Charging"),
-                    value: _filterEv,
-                    onChanged: (v) => setM(() => _filterEv = v),
-                  ),
-                  SwitchListTile(
-                    title: const Text("Covered"),
-                    value: _filterCovered,
-                    onChanged: (v) => setM(() => _filterCovered = v),
-                  ),
-                  SwitchListTile(
-                    title: const Text("Security (CCTV/Guard)"),
-                    value: _filterSecured,
-                    onChanged: (v) => setM(() => _filterSecured = v),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setM(() {
-                              _filterEv = _filterCovered = _filterSecured = false;
-                              _sort = 'Distance';
-                            });
-                          },
-                          child: const Text("Reset"),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: () {
-                            setState(() {});
-                            Navigator.pop(context);
-                          },
-                          child: const Text("Apply"),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // --- Layouts ---
-
-  Widget _buildWideLayout() {
-    return Row(
-      children: [
-        // Map view
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: _buildMapCard(),
-          ),
-        ),
-        // Services and Quick Book
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10, right: 10, bottom: 10),
-            child: Column(
+            child: Row(
               children: [
-                Expanded(flex: 1, child: _buildServicesSection()),
-                const SizedBox(height: 10),
-                Expanded(flex: 1, child: _buildQuickBookCard()),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.local_parking, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 12),
+                const Text('Park-Pro', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.notifications, color: Colors.black87),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.person, color: Colors.black87),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
+                  },
+                ),
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildStackedLayout() {
-    return ListView(
-      padding: const EdgeInsets.all(10),
-      children: [
-        _buildMapCard(height: 320),
-        const SizedBox(height: 10),
-        _buildServicesSection(),
-        const SizedBox(height: 10),
-        _buildQuickBookCard(),
-      ],
-    );
-  }
-
-  // Services Section
-  Widget _buildServicesSection() {
-    final services = _filteredServices;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              "Services",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const Divider(height: 1),
-          if (services.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text("No services match your search."),
-            )
-          else
-            SizedBox(
-              height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: services.length,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                itemBuilder: (context, index) {
-                  final service = services[index];
-                  return _buildServiceCard(service);
-                },
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildServiceCard(Service service) {
-    return Container(
-        width: 280,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Service Image
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
-              ),
-              child: Image.network(
-                service.imageUrl,
-                width: 100,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 100,
-                    color: Colors.grey.shade300,
-                    child: const Icon(Icons.image_not_supported),
-                  );
-                },
-              ),
-            ),
-            // Service Details
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          service.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          service.description,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '₹${service.price}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.green,
-                          ),
-                        ),
-                        FilledButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('${service.name} booked successfully!'),
-                              ),
-                            );
-                          },
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                          ),
-                          child: const Text('Book Now'),
-                        ),
-                      ],
-                    ),
-                  ],
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search parking, services, features...',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.grey.shade200,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
               ),
-            ),
-          ],
-        ),
-    );
-  }
-
-  // --- Cards ---
-
-  Widget _buildMapCard({double? height}) {
-    final markers = _filteredSortedSpots.map((s) {
-      return Marker(
-        markerId: MarkerId(s.id),
-        position: s.position,
-        icon: BitmapDescriptor.defaultMarkerWithHue(_hueFor(s)),
-        infoWindow: InfoWindow(title: s.name, snippet: "₹${s.pricePerHour.toStringAsFixed(0)}/hr"),
-        onTap: () {
-          setState(() => _activeSpotId = s.id);
-        },
-      );
-    }).toSet();
-
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: GoogleMap(
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
-        mapType: _mapType,
-        initialCameraPosition: CameraPosition(
-          target: _mockUserLocation,
-          zoom: 13.2,
-        ),
-        onMapCreated: (c) => _mapController = c,
-        markers: markers,
-      ),
-    );
-  }
-
-  Widget _buildQuickBookCard() {
-    final items = _filteredSortedSpots.take(8).toList();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(12, 12, 12, 6),
-            child: Text(
-              "Quick Book / Suggestions",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
             ),
           ),
-          const Divider(height: 1),
-          if (items.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text("No spots match your filters."),
-            )
-          else
-            SizedBox(
-              height: 200,
-              child: ListView.separated(
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, i) {
-                  final s = items[i];
-                  return ListTile(
-                    leading: Icon(Icons.local_parking,
-                        color: s.availableSpots >= 8
-                            ? Colors.green
-                            : s.availableSpots >= 4
-                            ? Colors.blue
-                            : Colors.red),
-                    title: Text(s.name),
-                    subtitle: Text(
-                        "${s.distanceKm} km • ₹${s.pricePerHour.toStringAsFixed(0)}/hr"),
-                    trailing: Text(
-                      s.availableSpots >= 8
-                          ? "Good"
-                          : s.availableSpots >= 4
-                          ? "Limited"
-                          : "Few",
-                      style: TextStyle(
-                        color: s.availableSpots >= 8
-                            ? Colors.green
-                            : s.availableSpots >= 4
-                            ? Colors.orange
-                            : Colors.red,
-                        fontWeight: FontWeight.w600,
-                      ),
+
+          // Scrollable content with sticky map
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                // Google Map (sticky)
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: screenHeight * 0.5,
+                    child: GoogleMap(
+                      onMapCreated: _onMapCreated,
+                      initialCameraPosition: CameraPosition(target: _center, zoom: 14.0),
+                      markers: {
+                        Marker(
+                            markerId: const MarkerId('current_location'),
+                            position: _center,
+                            infoWindow: const InfoWindow(title: 'Your Location')),
+                      },
                     ),
-                  );
-                },
-              ),
+                  ),
+                ),
+
+                // Quick Book / Suggestions
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Quick Book / Suggestions',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        ...filteredParkingSpots.map((spot) => ParkingSpotCard(
+                          name: spot['name'],
+                          price: spot['price'],
+                          distance: spot['distance'],
+                          available: spot['available'],
+                        )),
+                        const SizedBox(height: 16),
+
+                        // Services
+                        const Text('Services', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 180,
+                          child: PageView.builder(
+                            controller: _servicesController,
+                            itemCount: filteredServices.length,
+                            itemBuilder: (context, index) {
+                              final service = filteredServices[index];
+                              return AnimatedBuilder(
+                                animation: _servicesController,
+                                builder: (context, child) {
+                                  double value = 1.0;
+                                  if (_servicesController.position.haveDimensions) {
+                                    value = (_servicesController.page! - index).abs();
+                                    value = (1 - (value * 0.2)).clamp(0.8, 1.0);
+                                  }
+                                  return Center(
+                                    child: SizedBox(height: Curves.easeOut.transform(value) * 180, child: child),
+                                  );
+                                },
+                                child: ServiceCard(
+                                  icon: service['icon'],
+                                  title: service['title'],
+                                  price: service['price'],
+                                  duration: service['duration'],
+                                  distance: service['distance'],
+                                  rating: service['rating'],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Smart Features
+                        const Text('Smart Features', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 180,
+                          child: PageView.builder(
+                            controller: _featuresController,
+                            itemCount: filteredFeatures.length,
+                            itemBuilder: (context, index) {
+                              final feature = filteredFeatures[index];
+                              return AnimatedBuilder(
+                                animation: _featuresController,
+                                builder: (context, child) {
+                                  double value = 1.0;
+                                  if (_featuresController.position.haveDimensions) {
+                                    value = (_featuresController.page! - index).abs();
+                                    value = (1 - (value * 0.2)).clamp(0.8, 1.0);
+                                  }
+                                  return Center(
+                                    child: SizedBox(height: Curves.easeOut.transform(value) * 180, child: child),
+                                  );
+                                },
+                                child: FeatureCard(
+                                  icon: feature['icon'],
+                                  title: feature['title'],
+                                  description: feature['description'],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );
   }
+}
 
-  // --- Bottom Nav ---
+/// ----------------------
+/// PARKING CARD
+/// ----------------------
+class ParkingSpotCard extends StatelessWidget {
+  final String name;
+  final String price;
+  final String distance;
+  final int available;
 
-  Widget _buildBottomNav() {
-    return NavigationBar(
-      selectedIndex: _selectedTab,
-      onDestinationSelected: (i) => setState(() => _selectedTab = i),
-      destinations: const [
-        NavigationDestination(icon: Icon(Icons.home), label: "Home"),
-        NavigationDestination(icon: Icon(Icons.favorite_border), label: "Favorites"),
-        NavigationDestination(icon: Icon(Icons.book_online), label: "Bookings"),
-        NavigationDestination(icon: Icon(Icons.account_balance_wallet), label: "Wallet"),
-      ],
+  const ParkingSpotCard({
+    super.key,
+    required this.name,
+    required this.price,
+    required this.distance,
+    required this.available,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            const Icon(Icons.local_parking, size: 40, color: Colors.blue),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 4),
+                  Text('$price • $distance • $available spots available'),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {},
+              child: const Text('Book'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ----------------------
+/// SERVICE CARD
+/// ----------------------
+class ServiceCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String price;
+  final String duration;
+  final String distance;
+  final double rating;
+
+  const ServiceCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.price,
+    required this.duration,
+    required this.distance,
+    required this.rating,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Icon(icon, size: 40, color: Colors.blue),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('$price • $duration'),
+            Text('Distance: $distance'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.star, size: 16, color: Colors.orange),
+                const SizedBox(width: 4),
+                Text(rating.toString()),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ----------------------
+/// FEATURE CARD
+/// ----------------------
+class FeatureCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+
+  const FeatureCard({super.key, required this.icon, required this.title, required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: Colors.blue),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(description, textAlign: TextAlign.center),
+          ],
+        ),
+      ),
     );
   }
 }
