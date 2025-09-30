@@ -240,7 +240,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.lightBlueAccent,
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
           if (_unreadCount > 0)

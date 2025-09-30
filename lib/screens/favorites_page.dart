@@ -83,7 +83,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.lightBlueAccent,
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
           if (favoriteSpots.isNotEmpty)
@@ -137,7 +137,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             icon: const Icon(Icons.search),
             label: const Text('Find Parking Spots'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.lightBlueAccent,
+              backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -247,7 +247,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   _navigateToBooking(spot);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlueAccent,
+                  backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

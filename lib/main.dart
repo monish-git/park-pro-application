@@ -4,7 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 // Import your pages
 import 'screens/favorites_page.dart';
 import 'screens/booking_page.dart';
-import 'screens/wallet_page.dart';
+import 'screens/fastag_page.dart';
 import 'screens/notification_page.dart';
 import 'screens/profile_page.dart';
 
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Park-Pro',
+      title: 'Park-Pro+',
       theme: ThemeData(
         primarySwatch: Colors.red,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -42,7 +42,7 @@ class _QuickBookPageState extends State<QuickBookPage> {
     QuickBookHome(),
     FavoritesPage(),
     BookingPage(),
-    WalletPage(),
+    FastagPage(),
   ];
 
   @override
@@ -59,13 +59,13 @@ class _QuickBookPageState extends State<QuickBookPage> {
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorites'),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Bookings'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Wallet'),
+          BottomNavigationBarItem(icon: Icon(Icons.local_parking), label: 'FASTag'),
         ],
       ),
     );
@@ -73,7 +73,7 @@ class _QuickBookPageState extends State<QuickBookPage> {
 }
 
 /// ----------------------
-/// HOME PAGE (with map + quick book section)
+/// HOME PAGE
 /// ----------------------
 class QuickBookHome extends StatefulWidget {
   const QuickBookHome({super.key});
@@ -82,13 +82,42 @@ class QuickBookHome extends StatefulWidget {
   State<QuickBookHome> createState() => _QuickBookHomeState();
 }
 
-class _QuickBookHomeState extends State<QuickBookHome> {
+class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProviderStateMixin {
   late GoogleMapController mapController;
   final LatLng _center = const LatLng(37.7749, -122.4194);
   String _searchQuery = '';
 
   final PageController _servicesController = PageController(viewportFraction: 0.7);
   final PageController _featuresController = PageController(viewportFraction: 0.7);
+
+  // Chatbot animation controller
+  late AnimationController _chatController;
+  late Animation<Offset> _chatOffset;
+  bool _isChatOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _chatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _chatOffset = Tween<Offset>(
+      begin: const Offset(1.2, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _chatController, curve: Curves.easeInOut));
+  }
+
+  void _toggleChat() {
+    setState(() {
+      _isChatOpen = !_isChatOpen;
+      if (_isChatOpen) {
+        _chatController.forward();
+      } else {
+        _chatController.reverse();
+      }
+    });
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -115,191 +144,344 @@ class _QuickBookHomeState extends State<QuickBookHome> {
     {'icon': Icons.mic, 'title': 'Voice & Gesture Control', 'description': 'Park using voice & gestures'},
   ];
 
+  void _showFilterOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Filter Options',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Text('Price Range', style: TextStyle(fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Min Price',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Max Price',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('Maximum Distance', style: TextStyle(fontWeight: FontWeight.bold)),
+              Slider(
+                value: 5.0,
+                min: 0.1,
+                max: 20.0,
+                divisions: 40,
+                label: '5.0 km',
+                onChanged: (double value) {},
+              ),
+              const SizedBox(height: 16),
+              const Text('Availability', style: TextStyle(fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  FilterChip(
+                    label: const Text('Available Now'),
+                    onSelected: (bool value) {},
+                  ),
+                  const SizedBox(width: 8),
+                  FilterChip(
+                    label: const Text('EV Charging'),
+                    onSelected: (bool value) {},
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('Minimum Rating', style: TextStyle(fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  for (int i = 1; i <= 5; i++)
+                    IconButton(
+                      icon: Icon(Icons.star, color: i <= 4 ? Colors.orange : Colors.grey),
+                      onPressed: () {},
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Apply Filters'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      body: Column(
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
-            decoration: BoxDecoration(
-              color: Colors.lightBlue[50],
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
+    return Stack(
+      children: [
+        Column(
+          children: [
+            // Header with Park-Pro+ logo, notifications, profile
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+              decoration: BoxDecoration(
+                color: Colors.lightBlue[50],
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.local_parking, color: Colors.white, size: 24),
                   ),
-                  child: const Icon(Icons.local_parking, color: Colors.white, size: 24),
-                ),
-                const SizedBox(width: 12),
-                const Text('Park-Pro', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.notifications, color: Colors.black87),
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.person, color: Colors.black87),
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search parking, services, features...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+                  const SizedBox(width: 12),
+                  const Text('Park-Pro+', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.notifications, color: Colors.black87),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.person, color: Colors.black87),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
+                    },
+                  ),
+                ],
               ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
             ),
-          ),
-
-          // Scrollable content with sticky map
-          Expanded(
-            child: CustomScrollView(
-              slivers: [
-                // Google Map (sticky)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: screenHeight * 0.5,
-                    child: GoogleMap(
-                      onMapCreated: _onMapCreated,
-                      initialCameraPosition: CameraPosition(target: _center, zoom: 14.0),
-                      markers: {
-                        Marker(
-                            markerId: const MarkerId('current_location'),
-                            position: _center,
-                            infoWindow: const InfoWindow(title: 'Your Location')),
+            // Search Bar with Filter
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search parking, services, features...',
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: Colors.grey.shade200,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
                       },
                     ),
                   ),
-                ),
-
-                // Quick Book / Suggestions
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Quick Book / Suggestions',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 12),
-                        ...filteredParkingSpots.map((spot) => ParkingSpotCard(
-                          name: spot['name'],
-                          price: spot['price'],
-                          distance: spot['distance'],
-                          available: spot['available'],
-                        )),
-                        const SizedBox(height: 16),
-
-                        // Services
-                        const Text('Services', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 180,
-                          child: PageView.builder(
-                            controller: _servicesController,
-                            itemCount: filteredServices.length,
-                            itemBuilder: (context, index) {
-                              final service = filteredServices[index];
-                              return AnimatedBuilder(
-                                animation: _servicesController,
-                                builder: (context, child) {
-                                  double value = 1.0;
-                                  if (_servicesController.position.haveDimensions) {
-                                    value = (_servicesController.page! - index).abs();
-                                    value = (1 - (value * 0.2)).clamp(0.8, 1.0);
-                                  }
-                                  return Center(
-                                    child: SizedBox(height: Curves.easeOut.transform(value) * 180, child: child),
-                                  );
-                                },
-                                child: ServiceCard(
-                                  icon: service['icon'],
-                                  title: service['title'],
-                                  price: service['price'],
-                                  duration: service['duration'],
-                                  distance: service['distance'],
-                                  rating: service['rating'],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Smart Features
-                        const Text('Smart Features', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 180,
-                          child: PageView.builder(
-                            controller: _featuresController,
-                            itemCount: filteredFeatures.length,
-                            itemBuilder: (context, index) {
-                              final feature = filteredFeatures[index];
-                              return AnimatedBuilder(
-                                animation: _featuresController,
-                                builder: (context, child) {
-                                  double value = 1.0;
-                                  if (_featuresController.position.haveDimensions) {
-                                    value = (_featuresController.page! - index).abs();
-                                    value = (1 - (value * 0.2)).clamp(0.8, 1.0);
-                                  }
-                                  return Center(
-                                    child: SizedBox(height: Curves.easeOut.transform(value) * 180, child: child),
-                                  );
-                                },
-                                child: FeatureCard(
-                                  icon: feature['icon'],
-                                  title: feature['title'],
-                                  description: feature['description'],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.filter_list, color: Colors.white),
+                      onPressed: _showFilterOptions,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
+            ),
+            // Expanded content: Map + Quick Book + Services + Features
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: screenHeight * 0.5,
+                      child: GoogleMap(
+                        onMapCreated: _onMapCreated,
+                        initialCameraPosition: CameraPosition(target: _center, zoom: 14.0),
+                        markers: {
+                          Marker(
+                            markerId: const MarkerId('current_location'),
+                            position: _center,
+                            infoWindow: const InfoWindow(title: 'Your Location'),
+                          ),
+                        },
+                      ),
+                    ),
+                  ),
+                  // Quick Book, Services, Features (reuse your previous code)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Quick Book / Suggestions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          ...filteredParkingSpots.map((spot) => ParkingSpotCard(
+                            name: spot['name'],
+                            price: spot['price'],
+                            distance: spot['distance'],
+                            available: spot['available'],
+                          )),
+                          const SizedBox(height: 16),
+                          const Text('Services', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 180,
+                            child: PageView.builder(
+                              controller: _servicesController,
+                              itemCount: filteredServices.length,
+                              itemBuilder: (context, index) {
+                                final service = filteredServices[index];
+                                return AnimatedBuilder(
+                                  animation: _servicesController,
+                                  builder: (context, child) {
+                                    double value = 1.0;
+                                    if (_servicesController.position.haveDimensions) {
+                                      value = (_servicesController.page! - index).abs();
+                                      value = (1 - (value * 0.2)).clamp(0.8, 1.0);
+                                    }
+                                    return Center(
+                                      child: SizedBox(height: Curves.easeOut.transform(value) * 180, child: child),
+                                    );
+                                  },
+                                  child: ServiceCard(
+                                    icon: service['icon'],
+                                    title: service['title'],
+                                    price: service['price'],
+                                    duration: service['duration'],
+                                    distance: service['distance'],
+                                    rating: service['rating'],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text('Smart Features', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 180,
+                            child: PageView.builder(
+                              controller: _featuresController,
+                              itemCount: filteredFeatures.length,
+                              itemBuilder: (context, index) {
+                                final feature = filteredFeatures[index];
+                                return AnimatedBuilder(
+                                  animation: _featuresController,
+                                  builder: (context, child) {
+                                    double value = 1.0;
+                                    if (_featuresController.position.haveDimensions) {
+                                      value = (_featuresController.page! - index).abs();
+                                      value = (1 - (value * 0.2)).clamp(0.8, 1.0);
+                                    }
+                                    return Center(
+                                      child: SizedBox(height: Curves.easeOut.transform(value) * 180, child: child),
+                                    );
+                                  },
+                                  child: FeatureCard(
+                                    icon: feature['icon'],
+                                    title: feature['title'],
+                                    description: feature['description'],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        // Floating Chatbot Button
+        Positioned(
+          bottom: 24,
+          right: 24,
+          child: FloatingActionButton(
+            onPressed: _toggleChat,
+            child: const Icon(Icons.chat),
+          ),
+        ),
+        // Chatbot Panel
+        SlideTransition(
+          position: _chatOffset,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.7,
+              height: MediaQuery.of(context).size.height,
+              color: Colors.white,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Text('Chatbot', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Spacer(),
+                      IconButton(icon: const Icon(Icons.close), onPressed: _toggleChat),
+                    ],
+                  ),
+                  const Divider(),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Hello! I am your assistant.\nAsk me about parking, services, or FASTag.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Type your message...',
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.send),
+                        onPressed: () {},
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -341,10 +523,7 @@ class ParkingSpotCard extends StatelessWidget {
                 ],
               ),
             ),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Book'),
-            ),
+            ElevatedButton(onPressed: () {}, child: const Text('Book')),
           ],
         ),
       ),

@@ -198,7 +198,7 @@ class _BookingPageState extends State<BookingPage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.lightBlueAccent,
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
           PopupMenuButton<String>(
@@ -260,7 +260,7 @@ class _BookingPageState extends State<BookingPage> {
             icon: const Icon(Icons.search),
             label: const Text('Find Parking'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade800,
+              backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
