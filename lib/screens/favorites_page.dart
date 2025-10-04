@@ -8,7 +8,10 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
-  // Simple list of favorite spots without model dependency
+  // Use final instead of const
+  final Color darkGray = const Color(0xFF1E1E1E);
+  final Color electricBlue = const Color(0xFF2979FF);
+
   List<Map<String, dynamic>> favoriteSpots = [
     {
       'id': '1',
@@ -49,7 +52,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     setState(() {
       favoriteSpots.removeWhere((element) => element['id'] == spot['id']);
     });
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Removed ${spot['name']} from favorites'),
@@ -62,7 +64,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     setState(() {
       favoriteSpots.clear();
     });
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('All favorites cleared'),
@@ -74,16 +75,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: darkGray,
       appBar: AppBar(
         title: const Text(
           'My Favorites',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue,
+        backgroundColor: darkGray,
         foregroundColor: Colors.white,
         actions: [
           if (favoriteSpots.isNotEmpty)
@@ -94,9 +93,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ),
         ],
       ),
-      body: favoriteSpots.isEmpty
-          ? _buildEmptyState()
-          : _buildFavoritesList(),
+      body: favoriteSpots.isEmpty ? _buildEmptyState() : _buildFavoritesList(),
     );
   }
 
@@ -105,39 +102,29 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.favorite_border,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.favorite_border, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: 20),
           Text(
             'No favorites yet',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade300,
             ),
           ),
           const SizedBox(height: 10),
           Text(
             'Tap the heart icon to add parking spots to favorites',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade500),
           ),
           const SizedBox(height: 30),
           ElevatedButton.icon(
-            onPressed: () {
-              // Navigate to search or home page
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.search),
             label: const Text('Find Parking Spots'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: electricBlue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -156,7 +143,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             '${favoriteSpots.length} favorite parking ${favoriteSpots.length == 1 ? 'spot' : 'spots'}',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade400,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -177,11 +164,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   Widget _buildFavoriteItem(Map<String, dynamic> spot) {
     return Card(
+      color: const Color(0xFF2A2A2A),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -193,15 +179,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   child: Text(
                     spot['name'],
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.favorite, color: Colors.red),
+                  icon: Icon(Icons.favorite, color: electricBlue),
                   onPressed: () => _removeFromFavorites(spot),
                   tooltip: 'Remove from favorites',
                 ),
@@ -210,10 +194,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             const SizedBox(height: 8),
             Text(
               spot['address'],
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -224,12 +205,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 _buildInfoChip(
                   icon: Icons.attach_money,
                   text: '\$${spot['pricePerHour']}/h',
-                  color: Colors.green,
+                  color: Colors.greenAccent,
                 ),
                 _buildInfoChip(
                   icon: Icons.directions_car,
                   text: '${spot['availableSpots']} available',
-                  color: (spot['availableSpots'] as int) > 5 ? Colors.blue : Colors.orange,
+                  color: (spot['availableSpots'] as int) > 5 ? electricBlue : Colors.orange,
                 ),
                 _buildInfoChip(
                   icon: Icons.star,
@@ -242,16 +223,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to booking page
-                  _navigateToBooking(spot);
-                },
+                onPressed: () => _navigateToBooking(spot),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: electricBlue,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 child: const Text('Book Now'),
               ),
@@ -281,11 +257,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           const SizedBox(width: 4),
           Text(
             text,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: color,
-            ),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color),
           ),
         ],
       ),
@@ -293,7 +265,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   void _navigateToBooking(Map<String, dynamic> spot) {
-    // Implement navigation to booking page
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Booking ${spot['name']}...'),

@@ -22,7 +22,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
   }
 
   String _generateBotResponse(String message) {
-    // Dummy responses. Later replace with AI API integration.
     message = message.toLowerCase();
     if (message.contains('hello') || message.contains('hi')) {
       return 'Hello! How can I help you with Park-Pro today?';
@@ -37,11 +36,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF2E2E2E), // Dark Gray
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF1E90FF), // Electric Blue
         title: Row(
           children: [
-            // Chatbot Icon from assets/chatbot.png
             CircleAvatar(
               backgroundColor: Colors.white,
               radius: 18,
@@ -55,7 +54,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
               ),
             ),
             const SizedBox(width: 10),
-            const Text('Park-Pro Chatbot'),
+            const Text('Park-Pro Chatbot', style: TextStyle(color: Colors.white)),
           ],
         ),
       ),
@@ -74,37 +73,45 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
-                      color: isUser ? Colors.blue.shade200 : Colors.grey.shade300,
+                      color: isUser ? const Color(0xFF1E90FF) : Colors.grey.shade800,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(msg['text']!, style: const TextStyle(fontSize: 16)),
+                    child: Text(
+                      msg['text']!,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isUser ? Colors.white : Colors.white70,
+                      ),
+                    ),
                   ),
                 );
               },
             ),
           ),
-          const Divider(height: 1),
+          const Divider(height: 1, color: Colors.white30),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            color: const Color(0xFF3A3A3A),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       hintText: 'Type your message...',
+                      hintStyle: TextStyle(color: Colors.white54),
                       border: InputBorder.none,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.send, color: Colors.blue),
+                  icon: const Icon(Icons.send, color: Color(0xFF1E90FF)),
                   onPressed: _sendMessage,
                 )
               ],
             ),
-          )
+          ),
         ],
       ),
     );

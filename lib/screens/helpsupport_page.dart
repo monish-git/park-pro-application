@@ -26,13 +26,14 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF2E2E2E), // Dark gray
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF1E90FF), // Electric blue
         title: Row(
-          children: [
-            const Icon(Icons.local_parking, color: Colors.white),
-            const SizedBox(width: 8),
-            const Text(
+          children: const [
+            Icon(Icons.local_parking, color: Colors.white),
+            SizedBox(width: 8),
+            Text(
               "PARK-PRO Help & Support",
               style: TextStyle(color: Colors.white),
             ),
@@ -50,40 +51,59 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             children: [
               const Text(
                 "Frequently Asked Questions",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 12),
 
               /// FAQ Section
-              ExpansionTile(
-                title: const Text("How can I book a parking slot?"),
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      "Go to the Home page → Search parking → Select a spot → Tap 'Book'.",
-                    ),
-                  )
-                ],
+              Theme(
+                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  backgroundColor: const Color(0xFF3A3A3A),
+                  collapsedBackgroundColor: const Color(0xFF3A3A3A),
+                  textColor: Colors.white,
+                  collapsedTextColor: Colors.white70,
+                  title: const Text("How can I book a parking slot?"),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        "Go to the Home page → Search parking → Select a spot → Tap 'Book'.",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    )
+                  ],
+                ),
               ),
               ExpansionTile(
+                backgroundColor: const Color(0xFF3A3A3A),
+                collapsedBackgroundColor: const Color(0xFF3A3A3A),
+                textColor: Colors.white,
+                collapsedTextColor: Colors.white70,
                 title: const Text("How do I recharge my wallet?"),
                 children: const [
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
                       "Open Wallet page → Tap 'Add Money' → Choose payment method.",
+                      style: TextStyle(color: Colors.white70),
                     ),
                   )
                 ],
               ),
               ExpansionTile(
+                backgroundColor: const Color(0xFF3A3A3A),
+                collapsedBackgroundColor: const Color(0xFF3A3A3A),
+                textColor: Colors.white,
+                collapsedTextColor: Colors.white70,
                 title: const Text("Is FASTag supported?"),
                 children: const [
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
                       "Yes, PARK-PRO supports FASTag payments at partnered locations.",
+                      style: TextStyle(color: Colors.white70),
                     ),
                   )
                 ],
@@ -94,29 +114,29 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               /// Contact Section
               const Text(
                 "Contact Us",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 12),
               ListTile(
                 leading: const Icon(Icons.phone, color: Colors.green),
-                title: const Text("Call Support"),
-                subtitle: const Text("+91 98765 43210"),
-                onTap: () {
-                  // implement call function
-                },
+                title: const Text("Call Support", style: TextStyle(color: Colors.white)),
+                subtitle: const Text("+91 98765 43210",
+                    style: TextStyle(color: Colors.white70)),
+                onTap: () {},
               ),
               ListTile(
                 leading: const Icon(Icons.email, color: Colors.red),
-                title: const Text("Email Support"),
-                subtitle: const Text("support@parkpro.com"),
-                onTap: () {
-                  // implement email function
-                },
+                title: const Text("Email Support", style: TextStyle(color: Colors.white)),
+                subtitle: const Text("support@parkpro.com",
+                    style: TextStyle(color: Colors.white70)),
+                onTap: () {},
               ),
               ListTile(
                 leading: const Icon(Icons.chat, color: Colors.blue),
-                title: const Text("Live Chat"),
-                subtitle: const Text("Chat with our support team"),
+                title: const Text("Live Chat", style: TextStyle(color: Colors.white)),
+                subtitle: const Text("Chat with our support team",
+                    style: TextStyle(color: Colors.white70)),
                 onTap: () {
                   setState(() {
                     _isChatOpen = true;
@@ -129,25 +149,31 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               /// Feedback Form
               const Text(
                 "Send Feedback",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 12),
               TextField(
                 maxLines: 4,
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Write your feedback here...",
+                  hintStyle: const TextStyle(color: Colors.white54),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  fillColor: const Color(0xFF3A3A3A),
+                  filled: true,
                 ),
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
-                onPressed: () {
-                  // handle feedback submission
-                },
+                onPressed: () {},
                 icon: const Icon(Icons.send),
                 label: const Text("Submit Feedback"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E90FF),
+                ),
               ),
             ],
           ),
@@ -161,9 +187,9 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               child: Container(
                 height: 300,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFF2E2E2E),
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       blurRadius: 8,
@@ -176,7 +202,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: const Color(0xFF1E90FF),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(16),
                         ),
@@ -203,25 +229,29 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                     ),
                     Expanded(
                       child: ListView.builder(
+                        padding: const EdgeInsets.all(8),
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final msg = _messages[index];
                           bool isUser = msg["sender"] == "user";
                           return Container(
-                            alignment: isUser
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 12),
+                            alignment:
+                            isUser ? Alignment.centerRight : Alignment.centerLeft,
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                             child: Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: isUser
-                                    ? Colors.blue[100]
-                                    : Colors.grey[200],
+                                    ? const Color(0xFF1E90FF)
+                                    : Colors.grey.shade800,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(msg["text"] ?? ""),
+                              child: Text(
+                                msg["text"] ?? "",
+                                style: TextStyle(
+                                  color: isUser ? Colors.white : Colors.white70,
+                                ),
+                              ),
                             ),
                           );
                         },
@@ -234,16 +264,20 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                           Expanded(
                             child: TextField(
                               controller: _chatController,
+                              style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 hintText: "Type a message...",
+                                hintStyle: const TextStyle(color: Colors.white54),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
+                                fillColor: const Color(0xFF3A3A3A),
+                                filled: true,
                               ),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.send, color: Colors.blue),
+                            icon: const Icon(Icons.send, color: Color(0xFF1E90FF)),
                             onPressed: _sendMessage,
                           )
                         ],
@@ -263,7 +297,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             _isChatOpen = !_isChatOpen;
           });
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF1E90FF),
         child: const Icon(Icons.chat),
       ),
     );

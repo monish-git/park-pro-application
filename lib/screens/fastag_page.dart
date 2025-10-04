@@ -13,15 +13,20 @@ class FastagPage extends StatefulWidget {
 }
 
 class _FastagPageState extends State<FastagPage> {
-  double balance = 520.75; // Sample balance
+  final Color darkGray = const Color(0xFF1E1E1E);
+  final Color electricBlue = const Color(0xFF2979FF);
+
+  double balance = 520.75;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: darkGray,
       appBar: AppBar(
         title: const Text("FASTag"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: darkGray,
         elevation: 0,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -31,11 +36,11 @@ class _FastagPageState extends State<FastagPage> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.blueAccent,
+                color: electricBlue,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withOpacity(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -63,14 +68,12 @@ class _FastagPageState extends State<FastagPage> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () async {
-                        // Navigate to recharge page
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const FastagRechargePage(),
                           ),
                         );
-                        // Update balance if recharge returns a value
                         if (result != null && result is double) {
                           setState(() {
                             balance += result;
@@ -81,7 +84,7 @@ class _FastagPageState extends State<FastagPage> {
                       label: const Text("Recharge"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: Colors.blueAccent,
+                        foregroundColor: electricBlue,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -92,7 +95,6 @@ class _FastagPageState extends State<FastagPage> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
 
             // FASTag Services Section
@@ -100,7 +102,10 @@ class _FastagPageState extends State<FastagPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 "FASTag Services",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
             const SizedBox(height: 12),
@@ -112,22 +117,23 @@ class _FastagPageState extends State<FastagPage> {
                 crossAxisSpacing: 12,
                 childAspectRatio: 3 / 2,
                 children: [
-                  // Buy a New FASTag
                   ServiceCard(
                     icon: Icons.add_box,
                     title: "Buy New FASTag",
+                    electricBlue: electricBlue,
+                    darkGray: darkGray,
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => BuyNewFastagPage()), // No const keyword
+                        MaterialPageRoute(builder: (context) => BuyNewFastagPage()),
                       );
                     },
                   ),
-
-                  // Transaction History
                   ServiceCard(
                     icon: Icons.history,
                     title: "Transaction History",
+                    electricBlue: electricBlue,
+                    darkGray: darkGray,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -135,11 +141,11 @@ class _FastagPageState extends State<FastagPage> {
                       );
                     },
                   ),
-
-                  // Link Vehicle
                   ServiceCard(
                     icon: Icons.link,
                     title: "Link Vehicle",
+                    electricBlue: electricBlue,
+                    darkGray: darkGray,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -147,11 +153,11 @@ class _FastagPageState extends State<FastagPage> {
                       );
                     },
                   ),
-
-                  // Deactivate FASTag
                   ServiceCard(
                     icon: Icons.cancel,
                     title: "Deactivate FASTag",
+                    electricBlue: electricBlue,
+                    darkGray: darkGray,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -174,12 +180,16 @@ class ServiceCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
+  final Color electricBlue;
+  final Color darkGray;
 
   const ServiceCard({
     super.key,
     required this.icon,
     required this.title,
     required this.onTap,
+    required this.electricBlue,
+    required this.darkGray,
   });
 
   @override
@@ -187,6 +197,7 @@ class ServiceCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
+        color: darkGray,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 3,
         child: Padding(
@@ -194,12 +205,13 @@ class ServiceCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: Colors.blueAccent),
+              Icon(icon, size: 40, color: electricBlue),
               const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ],
           ),

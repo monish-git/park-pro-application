@@ -20,9 +20,46 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Park-Pro+',
       theme: ThemeData(
-        primarySwatch: Colors.red,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        primaryColor: const Color(0xFF2979FF), // Electric Blue
+        scaffoldBackgroundColor: const Color(0xFF121212), // Dark Gray
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.blue,
+          brightness: Brightness.dark,
+        ).copyWith(
+          secondary: const Color(0xFF2979FF), // Electric Blue
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1E1E1E), // Slightly lighter dark gray
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF1E1E1E),
+          selectedItemColor: Color(0xFF2979FF),
+          unselectedItemColor: Colors.grey,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2979FF),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFF2979FF),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[850],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          hintStyle: const TextStyle(color: Colors.grey),
+        ),
       ),
+      debugShowCheckedModeBanner: false,
       home: const QuickBookPage(),
     );
   }
@@ -48,19 +85,11 @@ class _QuickBookPageState extends State<QuickBookPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorites'),
@@ -90,7 +119,6 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
   final PageController _servicesController = PageController(viewportFraction: 0.7);
   final PageController _featuresController = PageController(viewportFraction: 0.7);
 
-  // Chatbot animation controller
   late AnimationController _chatController;
   late Animation<Offset> _chatOffset;
   bool _isChatOpen = false;
@@ -111,11 +139,7 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
   void _toggleChat() {
     setState(() {
       _isChatOpen = !_isChatOpen;
-      if (_isChatOpen) {
-        _chatController.forward();
-      } else {
-        _chatController.reverse();
-      }
+      _isChatOpen ? _chatController.forward() : _chatController.reverse();
     });
   }
 
@@ -123,7 +147,6 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
     mapController = controller;
   }
 
-  // Sample data
   final List<Map<String, dynamic>> filteredParkingSpots = [
     {'name': 'Downtown Parking', 'price': '₹120', 'distance': '0.8 km', 'available': 5},
     {'name': 'City Center Garage', 'price': '₹150', 'distance': '1.2 km', 'available': 3},
@@ -146,6 +169,7 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
 
   void _showFilterOptions() {
     showModalBottomSheet(
+      backgroundColor: const Color(0xFF1E1E1E),
       context: context,
       builder: (BuildContext context) {
         return Container(
@@ -156,34 +180,44 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
             children: [
               const Text(
                 'Filter Options',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 16),
-              const Text('Price Range', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Price Range', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
-                      decoration: const InputDecoration(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
                         labelText: 'Min Price',
                         border: OutlineInputBorder(),
+                        fillColor: Colors.grey[850],
+                        filled: true,
+                        labelStyle: const TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: TextFormField(
-                      decoration: const InputDecoration(
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
                         labelText: 'Max Price',
                         border: OutlineInputBorder(),
+                        fillColor: Colors.grey[850],
+                        filled: true,
+                        labelStyle: const TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('Maximum Distance', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Maximum Distance', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               Slider(
+                activeColor: const Color(0xFF2979FF),
+                inactiveColor: Colors.grey,
                 value: 5.0,
                 min: 0.1,
                 max: 20.0,
@@ -192,22 +226,24 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
                 onChanged: (double value) {},
               ),
               const SizedBox(height: 16),
-              const Text('Availability', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Availability', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               Row(
                 children: [
                   FilterChip(
                     label: const Text('Available Now'),
+                    selectedColor: const Color(0xFF2979FF),
                     onSelected: (bool value) {},
                   ),
                   const SizedBox(width: 8),
                   FilterChip(
                     label: const Text('EV Charging'),
+                    selectedColor: const Color(0xFF2979FF),
                     onSelected: (bool value) {},
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('Minimum Rating', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Minimum Rating', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               Row(
                 children: [
                   for (int i = 1; i <= 5; i++)
@@ -242,11 +278,10 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
       children: [
         Column(
           children: [
-            // Header with Park-Pro+ logo, notifications, profile
             Container(
               padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
               decoration: BoxDecoration(
-                color: Colors.lightBlue[50],
+                color: const Color(0xFF1E1E1E),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -258,22 +293,22 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: const Color(0xFF2979FF),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.local_parking, color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: 12),
-                  const Text('Park-Pro+', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const Text('Park-Pro+', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.notifications, color: Colors.black87),
+                    icon: const Icon(Icons.notifications, color: Colors.white),
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.person, color: Colors.black87),
+                    icon: const Icon(Icons.person, color: Colors.white),
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
                     },
@@ -281,34 +316,31 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
                 ],
               ),
             ),
-            // Search Bar with Filter
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: 'Search parking, services, features...',
-                        prefixIcon: const Icon(Icons.search),
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
                         filled: true,
-                        fillColor: Colors.grey.shade200,
+                        fillColor: Colors.grey[850],
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
+                        hintStyle: const TextStyle(color: Colors.grey),
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value;
-                        });
-                      },
+                      onChanged: (value) => setState(() => _searchQuery = value),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: const Color(0xFF2979FF),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
@@ -319,7 +351,6 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
                 ],
               ),
             ),
-            // Expanded content: Map + Quick Book + Services + Features
             Expanded(
               child: CustomScrollView(
                 slivers: [
@@ -339,14 +370,13 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
                       ),
                     ),
                   ),
-                  // Quick Book, Services, Features (reuse your previous code)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Quick Book / Suggestions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const Text('Quick Book / Suggestions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                           const SizedBox(height: 12),
                           ...filteredParkingSpots.map((spot) => ParkingSpotCard(
                             name: spot['name'],
@@ -355,7 +385,7 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
                             available: spot['available'],
                           )),
                           const SizedBox(height: 16),
-                          const Text('Services', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const Text('Services', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                           const SizedBox(height: 12),
                           SizedBox(
                             height: 180,
@@ -389,7 +419,7 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
                             ),
                           ),
                           const SizedBox(height: 16),
-                          const Text('Smart Features', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const Text('Smart Features', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                           const SizedBox(height: 12),
                           SizedBox(
                             height: 180,
@@ -428,7 +458,6 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
             ),
           ],
         ),
-        // Floating Chatbot Button
         Positioned(
           bottom: 24,
           right: 24,
@@ -437,7 +466,6 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
             child: const Icon(Icons.chat),
           ),
         ),
-        // Chatbot Panel
         SlideTransition(
           position: _chatOffset,
           child: Align(
@@ -445,34 +473,39 @@ class _QuickBookHomeState extends State<QuickBookHome> with SingleTickerProvider
             child: Container(
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height,
-              color: Colors.white,
+              color: const Color(0xFF1E1E1E),
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      const Text('Chatbot', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text('Chatbot', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                       const Spacer(),
-                      IconButton(icon: const Icon(Icons.close), onPressed: _toggleChat),
+                      IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: _toggleChat),
                     ],
                   ),
-                  const Divider(),
+                  const Divider(color: Colors.grey),
                   const Expanded(
                     child: Center(
                       child: Text(
                         'Hello! I am your assistant.\nAsk me about parking, services, or FASTag.',
                         textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
                   TextField(
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Type your message...',
+                      hintStyle: const TextStyle(color: Colors.grey),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.send),
+                        icon: const Icon(Icons.send, color: Color(0xFF2979FF)),
                         onPressed: () {},
                       ),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.grey[850],
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -506,24 +539,29 @@ class ParkingSpotCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: const Color(0xFF1E1E1E),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            const Icon(Icons.local_parking, size: 40, color: Colors.blue),
+            const Icon(Icons.local_parking, size: 40, color: Color(0xFF2979FF)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
                   const SizedBox(height: 4),
-                  Text('$price • $distance • $available spots available'),
+                  Text('$price • $distance • $available spots available', style: const TextStyle(color: Colors.white70)),
                 ],
               ),
             ),
-            ElevatedButton(onPressed: () {}, child: const Text('Book')),
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2979FF)),
+              child: const Text('Book'),
+            ),
           ],
         ),
       ),
@@ -555,6 +593,7 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: const Color(0xFF1E1E1E),
       margin: const EdgeInsets.symmetric(horizontal: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
@@ -563,16 +602,16 @@ class ServiceCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Icon(icon, size: 40, color: Colors.blue),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text('$price • $duration'),
-            Text('Distance: $distance'),
+            Icon(icon, size: 40, color: const Color(0xFF2979FF)),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+            Text('$price • $duration', style: const TextStyle(color: Colors.white70)),
+            Text('Distance: $distance', style: const TextStyle(color: Colors.white70)),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.star, size: 16, color: Colors.orange),
                 const SizedBox(width: 4),
-                Text(rating.toString()),
+                Text(rating.toString(), style: const TextStyle(color: Colors.white)),
               ],
             )
           ],
@@ -595,6 +634,7 @@ class FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: const Color(0xFF1E1E1E),
       margin: const EdgeInsets.symmetric(horizontal: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
@@ -603,11 +643,11 @@ class FeatureCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: Colors.blue),
+            Icon(icon, size: 40, color: const Color(0xFF2979FF)),
             const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
             const SizedBox(height: 4),
-            Text(description, textAlign: TextAlign.center),
+            Text(description, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
           ],
         ),
       ),

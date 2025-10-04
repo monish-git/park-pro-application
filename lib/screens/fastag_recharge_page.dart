@@ -9,8 +9,10 @@ class FastagRechargePage extends StatefulWidget {
 
 class _FastagRechargePageState extends State<FastagRechargePage> {
   final TextEditingController _amountController = TextEditingController();
-
   String _selectedMethod = "UPI"; // Default payment method
+
+  final Color darkGray = const Color(0xFF1E1E1E);
+  final Color electricBlue = const Color(0xFF2979FF);
 
   void _recharge() {
     String amount = _amountController.text.trim();
@@ -31,9 +33,11 @@ class _FastagRechargePageState extends State<FastagRechargePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: darkGray,
       appBar: AppBar(
         title: const Text("Recharge FASTag"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: darkGray,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Padding(
@@ -43,25 +47,29 @@ class _FastagRechargePageState extends State<FastagRechargePage> {
           children: [
             const Text(
               "Enter Recharge Amount",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: "Enter amount (₹)",
-                prefixIcon: const Icon(Icons.currency_rupee),
+                hintStyle: TextStyle(color: Colors.grey.shade400),
+                prefixIcon: Icon(Icons.currency_rupee, color: electricBlue),
+                filled: true,
+                fillColor: Colors.grey.shade800,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
             const SizedBox(height: 20),
-
             const Text(
               "Select Payment Method",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
             ),
             const SizedBox(height: 10),
 
@@ -69,8 +77,9 @@ class _FastagRechargePageState extends State<FastagRechargePage> {
             Column(
               children: [
                 RadioListTile(
-                  title: const Text("UPI"),
+                  title: const Text("UPI", style: TextStyle(color: Colors.white)),
                   value: "UPI",
+                  activeColor: electricBlue,
                   groupValue: _selectedMethod,
                   onChanged: (value) {
                     setState(() {
@@ -79,8 +88,9 @@ class _FastagRechargePageState extends State<FastagRechargePage> {
                   },
                 ),
                 RadioListTile(
-                  title: const Text("Credit/Debit Card"),
+                  title: const Text("Credit/Debit Card", style: TextStyle(color: Colors.white)),
                   value: "Card",
+                  activeColor: electricBlue,
                   groupValue: _selectedMethod,
                   onChanged: (value) {
                     setState(() {
@@ -103,7 +113,8 @@ class _FastagRechargePageState extends State<FastagRechargePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: Colors.blueAccent,
+                  backgroundColor: electricBlue,
+                  foregroundColor: Colors.white,
                 ),
                 child: const Text(
                   "Recharge Now",

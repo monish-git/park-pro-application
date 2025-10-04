@@ -8,7 +8,9 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
-  // Mock booking data
+  final Color darkGray = const Color(0xFF1E1E1E);
+  final Color electricBlue = const Color(0xFF2979FF);
+
   final List<Map<String, dynamic>> _bookings = [
     {
       'id': '1',
@@ -55,11 +57,11 @@ class _BookingPageState extends State<BookingPage> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'confirmed':
-        return Colors.blue;
+        return electricBlue;
       case 'completed':
-        return Colors.green;
+        return Colors.greenAccent;
       case 'cancelled':
-        return Colors.red;
+        return Colors.redAccent;
       default:
         return Colors.grey;
     }
@@ -82,7 +84,7 @@ class _BookingPageState extends State<BookingPage> {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
-      backgroundColor: Colors.white,
+      backgroundColor: darkGray,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -98,6 +100,7 @@ class _BookingPageState extends State<BookingPage> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 8),
@@ -105,7 +108,7 @@ class _BookingPageState extends State<BookingPage> {
                 booking['address'],
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: Colors.grey.shade400,
                 ),
               ),
               const SizedBox(height: 16),
@@ -120,7 +123,7 @@ class _BookingPageState extends State<BookingPage> {
                   Chip(
                     label: Text(
                       booking['status'].toUpperCase(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -150,19 +153,20 @@ class _BookingPageState extends State<BookingPage> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey.shade600),
+          Icon(icon, size: 20, color: Colors.grey.shade400),
           const SizedBox(width: 12),
           Text(
             '$label: ',
             style: TextStyle(
               fontWeight: FontWeight.w500,
-              color: Colors.grey.shade700,
+              color: Colors.grey.shade300,
             ),
           ),
           Text(
             value,
             style: const TextStyle(
               fontWeight: FontWeight.w400,
+              color: Colors.white,
             ),
           ),
         ],
@@ -189,6 +193,7 @@ class _BookingPageState extends State<BookingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: darkGray,
       appBar: AppBar(
         title: const Text(
           'My Bookings',
@@ -198,7 +203,7 @@ class _BookingPageState extends State<BookingPage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue,
+        backgroundColor: darkGray,
         foregroundColor: Colors.white,
         actions: [
           PopupMenuButton<String>(
@@ -239,7 +244,7 @@ class _BookingPageState extends State<BookingPage> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
+              color: Colors.grey.shade300,
             ),
           ),
           const SizedBox(height: 10),
@@ -254,13 +259,12 @@ class _BookingPageState extends State<BookingPage> {
           const SizedBox(height: 30),
           ElevatedButton.icon(
             onPressed: () {
-              // Navigate back to home to book
               Navigator.pop(context);
             },
             icon: const Icon(Icons.search),
             label: const Text('Find Parking'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: electricBlue,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -281,7 +285,7 @@ class _BookingPageState extends State<BookingPage> {
                 '${_filteredBookings.length} booking${_filteredBookings.length == 1 ? '' : 's'}',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey.shade600,
+                  color: Colors.grey.shade400,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -314,6 +318,7 @@ class _BookingPageState extends State<BookingPage> {
 
   Widget _buildBookingCard(Map<String, dynamic> booking) {
     return Card(
+      color: const Color(0xFF2A2A2A),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -330,6 +335,7 @@ class _BookingPageState extends State<BookingPage> {
           booking['parkingName'],
           style: const TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
         subtitle: Column(
@@ -340,7 +346,7 @@ class _BookingPageState extends State<BookingPage> {
               booking['address'],
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: Colors.grey.shade400,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -350,7 +356,7 @@ class _BookingPageState extends State<BookingPage> {
               '${booking['date']} • ${booking['time']}',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: Colors.grey.shade400,
               ),
             ),
             const SizedBox(height: 4),
@@ -359,6 +365,7 @@ class _BookingPageState extends State<BookingPage> {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
+                color: Colors.white,
               ),
             ),
           ],

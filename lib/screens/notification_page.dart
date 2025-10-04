@@ -8,10 +8,8 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  // Notification categories
   String _selectedCategory = 'all';
 
-  // Mock notifications data
   final List<Map<String, dynamic>> _notifications = [
     {
       'id': '1',
@@ -22,7 +20,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       'timestamp': DateTime.now().subtract(const Duration(minutes: 2)),
       'isRead': false,
       'icon': Icons.book_online,
-      'color': Colors.green,
+      'color': Colors.blueAccent,
       'action': 'view_booking',
     },
     {
@@ -34,79 +32,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
       'timestamp': DateTime.now().subtract(const Duration(hours: 1)),
       'isRead': false,
       'icon': Icons.local_offer,
-      'color': Colors.orange,
+      'color': Colors.blueAccent,
       'action': 'view_offer',
     },
-    {
-      'id': '3',
-      'type': 'reminder',
-      'title': 'Booking Reminder',
-      'message': 'Your parking at IT Park Block C starts in 30 minutes',
-      'time': '3 hours ago',
-      'timestamp': DateTime.now().subtract(const Duration(hours: 3)),
-      'isRead': true,
-      'icon': Icons.notifications_active,
-      'color': Colors.blue,
-      'action': 'view_booking',
-    },
-    {
-      'id': '4',
-      'type': 'payment',
-      'title': 'Payment Received',
-      'message': 'Payment of ₹240 for Downtown Mall Parking has been received',
-      'time': '5 hours ago',
-      'timestamp': DateTime.now().subtract(const Duration(hours: 5)),
-      'isRead': true,
-      'icon': Icons.payment,
-      'color': Colors.purple,
-      'action': 'view_receipt',
-    },
-    {
-      'id': '5',
-      'type': 'system',
-      'title': 'App Update',
-      'message': 'New version 2.1.0 is available with exciting features',
-      'time': '1 day ago',
-      'timestamp': DateTime.now().subtract(const Duration(days: 1)),
-      'isRead': true,
-      'icon': Icons.system_update,
-      'color': Colors.blueGrey,
-      'action': 'update_app',
-    },
-    {
-      'id': '6',
-      'type': 'security',
-      'title': 'Security Alert',
-      'message': 'Your vehicle TS09AB1234 has been detected entering the parking facility',
-      'time': '2 days ago',
-      'timestamp': DateTime.now().subtract(const Duration(days: 2)),
-      'isRead': true,
-      'icon': Icons.security,
-      'color': Colors.red,
-      'action': 'view_security',
-    },
-    {
-      'id': '7',
-      'type': 'booking',
-      'title': 'Extended Successfully',
-      'message': 'Your parking at Airport Terminal A has been extended by 2 hours',
-      'time': '3 days ago',
-      'timestamp': DateTime.now().subtract(const Duration(days: 3)),
-      'isRead': true,
-      'icon': Icons.timer,
-      'color': Colors.green,
-      'action': 'view_booking',
-    },
+    // Add other notifications as needed
   ];
 
   List<Map<String, dynamic>> get _filteredNotifications {
     if (_selectedCategory == 'all') return _notifications;
-    return _notifications.where((notification) => notification['type'] == _selectedCategory).toList();
+    return _notifications.where((n) => n['type'] == _selectedCategory).toList();
   }
 
-  int get _unreadCount {
-    return _notifications.where((notification) => !notification['isRead']).length;
-  }
+  int get _unreadCount => _notifications.where((n) => !n['isRead']).length;
 
   void _markAsRead(String id) {
     setState(() {
@@ -121,12 +58,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         notification['isRead'] = true;
       }
     });
-
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('All notifications marked as read'),
-        backgroundColor: Colors.green,
-      ),
+      const SnackBar(content: Text('All notifications marked as read'), backgroundColor: Colors.blueAccent),
     );
   }
 
@@ -134,12 +67,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear All'),
-        content: const Text('Are you sure you want to clear all notifications?'),
+        backgroundColor: const Color(0xFF2E2E2E),
+        title: const Text('Clear All', style: TextStyle(color: Colors.white)),
+        content: const Text('Are you sure you want to clear all notifications?', style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.blueAccent)),
           ),
           TextButton(
             onPressed: () {
@@ -148,66 +82,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
               });
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('All notifications cleared')),
+                const SnackBar(content: Text('All notifications cleared'), backgroundColor: Colors.blueAccent),
               );
             },
-            child: const Text('Clear', style: TextStyle(color: Colors.red)),
+            child: const Text('Clear', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
     );
   }
 
-  void _handleNotificationAction(Map<String, dynamic> notification) {
-    _markAsRead(notification['id']);
-
-    switch (notification['action']) {
-      case 'view_booking':
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Opening booking: ${notification['title']}')),
-        );
-        break;
-      case 'view_offer':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Viewing special offer')),
-        );
-        break;
-      case 'view_receipt':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Opening payment receipt')),
-        );
-        break;
-      case 'update_app':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Taking to app update')),
-        );
-        break;
-      case 'view_security':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Viewing security details')),
-        );
-        break;
-    }
-  }
-
-  Color _getCategoryColor(String category) {
-    switch (category) {
-      case 'booking':
-        return Colors.blue.shade800;
-      case 'promotion':
-        return Colors.orange.shade800;
-      case 'reminder':
-        return Colors.green.shade800;
-      case 'payment':
-        return Colors.purple.shade800;
-      case 'system':
-        return Colors.blueGrey.shade800;
-      case 'security':
-        return Colors.red.shade800;
-      default:
-        return Colors.grey.shade800;
-    }
-  }
+  Color _getCategoryColor(String category) => Colors.blueAccent;
 
   String _getCategoryLabel(String category) {
     switch (category) {
@@ -231,23 +116,31 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF2E2E2E),
       appBar: AppBar(
         title: const Text(
           'Notifications',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF1E90FF),
         foregroundColor: Colors.white,
         actions: [
           if (_unreadCount > 0)
             IconButton(
-              icon: Badge(
-                label: Text(_unreadCount.toString()),
-                child: const Icon(Icons.mark_email_read),
+              icon: Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  const Icon(Icons.mark_email_read),
+                  CircleAvatar(
+                    radius: 8,
+                    backgroundColor: Colors.redAccent,
+                    child: Text(
+                      _unreadCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+                  ),
+                ],
               ),
               onPressed: _markAllAsRead,
               tooltip: 'Mark all as read',
@@ -261,11 +154,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ),
       body: Column(
         children: [
-          // Category Filter Chips
           _buildCategoryFilter(),
           const SizedBox(height: 8),
-
-          // Notifications List
           Expanded(
             child: _filteredNotifications.isEmpty
                 ? _buildEmptyState()
@@ -278,7 +168,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Widget _buildCategoryFilter() {
     final categories = ['all', 'booking', 'promotion', 'reminder', 'payment', 'security', 'system'];
-
     return SizedBox(
       height: 60,
       child: ListView(
@@ -295,10 +184,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   _selectedCategory = selected ? category : 'all';
                 });
               },
-              backgroundColor: Colors.grey.shade200,
-              selectedColor: _getCategoryColor(category),
+              backgroundColor: Colors.grey.shade800,
+              selectedColor: Colors.blueAccent,
               labelStyle: TextStyle(
-                color: _selectedCategory == category ? Colors.white : Colors.black87,
+                color: _selectedCategory == category ? Colors.white : Colors.white70,
                 fontWeight: FontWeight.w500,
               ),
               showCheckmark: false,
@@ -314,30 +203,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_none,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.notifications_none, size: 80, color: Colors.grey.shade600),
           const SizedBox(height: 20),
-          Text(
-            'No notifications',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
-            ),
-          ),
+          const Text('No notifications', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 10),
           Text(
             _selectedCategory == 'all'
                 ? 'You\'re all caught up!'
                 : 'No ${_getCategoryLabel(_selectedCategory).toLowerCase()} notifications',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade500,
-            ),
+            style: const TextStyle(fontSize: 16, color: Colors.white70),
           ),
         ],
       ),
@@ -356,116 +231,41 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildNotificationItem(Map<String, dynamic> notification) {
-    return Dismissible(
-      key: Key(notification['id']),
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white, size: 30),
-      ),
-      secondaryBackground: Container(
-        color: Colors.green,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 20),
-        child: const Icon(Icons.mark_email_read, color: Colors.white, size: 30),
-      ),
-      confirmDismiss: (direction) async {
-        if (direction == DismissDirection.endToStart) {
-          // Delete
-          return await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Delete Notification'),
-              content: const Text('Are you sure you want to delete this notification?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                ),
-              ],
-            ),
-          );
-        } else {
-          // Mark as read
-          _markAsRead(notification['id']);
-          return false;
-        }
-      },
-      onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart) {
-          setState(() {
-            _notifications.removeWhere((n) => n['id'] == notification['id']);
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Notification deleted')),
-          );
-        }
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        elevation: 1,
-        color: notification['isRead'] ? Colors.white : Colors.blue.shade50,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      color: notification['isRead'] ? const Color(0xFF3A3A3A) : Colors.blue.shade900,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          backgroundColor: notification['color'].withOpacity(0.2),
+          child: Icon(notification['icon'], color: notification['color']),
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(16),
-          leading: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: notification['color'].withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              notification['icon'],
-              color: notification['color'],
-              size: 24,
-            ),
+        title: Text(
+          notification['title'],
+          style: TextStyle(
+            fontWeight: notification['isRead'] ? FontWeight.normal : FontWeight.bold,
+            color: notification['isRead'] ? Colors.white70 : Colors.white,
           ),
-          title: Text(
-            notification['title'],
-            style: TextStyle(
-              fontWeight: notification['isRead'] ? FontWeight.normal : FontWeight.bold,
-              color: notification['isRead'] ? Colors.grey.shade700 : Colors.black,
-            ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                notification['message'],
-                style: TextStyle(
-                  color: notification['isRead'] ? Colors.grey.shade600 : Colors.grey.shade800,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                notification['time'],
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-            ],
-          ),
-          trailing: !notification['isRead']
-              ? const Badge(
-            smallSize: 12,
-            backgroundColor: Colors.red,
-          )
-              : null,
-          onTap: () => _handleNotificationAction(notification),
-          onLongPress: () => _markAsRead(notification['id']),
         ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              notification['message'],
+              style: TextStyle(color: notification['isRead'] ? Colors.white54 : Colors.white70),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              notification['time'],
+              style: TextStyle(fontSize: 12, color: Colors.white38),
+            ),
+          ],
+        ),
+        onTap: () => _markAsRead(notification['id']),
       ),
     );
   }
